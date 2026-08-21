@@ -1,26 +1,18 @@
-import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
+import { computed, ref } from 'vue';
 
-import client, { prepareCsrf } from '../api/client';
-
-export interface User {
-    id: number;
-    name: string;
-    email: string;
-}
-
-interface Credentials {
-    email: string;
-    password: string;
-}
-
-interface RegistrationData extends Credentials {
-    name: string;
-    password_confirmation: string;
-}
+import {
+    fetchAuthenticatedUser,
+    login as loginRequest,
+    logout as logoutRequest,
+    register as registerRequest,
+    type AuthenticatedUser,
+    type LoginCredentials,
+    type RegistrationData,
+} from '../api/auth-api';
 
 export const useAuthStore = defineStore('auth', () => {
-    const user = ref<User | null>(null);
+    const user = ref<AuthenticatedUser | null>(null);
     const initialized = ref(false);
     const loading = ref(false);
 
@@ -30,7 +22,7 @@ export const useAuthStore = defineStore('auth', () => {
         if (initialized.value) return;
 
         try {
-            user.value = (await client.get<{ user: User }>('/me')).data.user;
+            user.value = await fetchAuthenticatedUser();
         } catch {
             user.value = null;
         } finally {
@@ -38,11 +30,10 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
-    async function login(credentials: Credentials): Promise<void> {
+    async function login(credentials: LoginCredentials): Promise<void> {
         loading.value = true;
         try {
-            await prepareCsrf();
-            user.value = (await client.post<{ user: User }>('/auth/login', credentials)).data.user;
+            user.value = await loginRequest(credentials);
         } finally {
             loading.value = false;
         }
@@ -51,8 +42,7 @@ export const useAuthStore = defineStore('auth', () => {
     async function register(data: RegistrationData): Promise<void> {
         loading.value = true;
         try {
-            await prepareCsrf();
-            user.value = (await client.post<{ user: User }>('/auth/register', data)).data.user;
+            user.value = await registerRequest(data);
         } finally {
             loading.value = false;
         }
@@ -61,7 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
     async function logout(): Promise<void> {
         loading.value = true;
         try {
-            await client.post('/auth/logout');
+            await logoutRequest();
         } finally {
             user.value = null;
             loading.value = false;

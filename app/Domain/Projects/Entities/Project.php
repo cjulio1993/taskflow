@@ -11,13 +11,14 @@ final class Project
 {
     private function __construct(
         private readonly ?int $id,
+        private readonly int $ownerId,
         private readonly string $name,
         private readonly ?string $description,
         private readonly DateTimeImmutable $createdAt,
         private readonly DateTimeImmutable $updatedAt,
     ) {}
 
-    public static function create(string $name, ?string $description): self
+    public static function create(int $ownerId, string $name, ?string $description): self
     {
         $name = trim($name);
 
@@ -29,6 +30,7 @@ final class Project
 
         return new self(
             id: null,
+            ownerId: $ownerId,
             name: $name,
             description: self::normalizeDescription($description),
             createdAt: $now,
@@ -38,6 +40,7 @@ final class Project
 
     public static function reconstitute(
         int $id,
+        int $ownerId,
         string $name,
         ?string $description,
         DateTimeImmutable $createdAt,
@@ -45,6 +48,7 @@ final class Project
     ): self {
         return new self(
             id: $id,
+            ownerId: $ownerId,
             name: $name,
             description: $description,
             createdAt: $createdAt,
@@ -60,6 +64,11 @@ final class Project
     public function name(): string
     {
         return $this->name;
+    }
+
+    public function ownerId(): int
+    {
+        return $this->ownerId;
     }
 
     public function description(): ?string

@@ -23,6 +23,7 @@ final class ProjectResource extends JsonResource
 
         return [
             'id' => $project->id(),
+            'owner_id' => $project->ownerId(),
             'name' => $project->name(),
             'description' => $project->description(),
             'created_at' => $project->createdAt()->format(DATE_ATOM),

@@ -14,8 +14,8 @@ final readonly class ListProjects
     /**
      * @return list<Project>
      */
-    public function execute(): array
+    public function execute(int $userId): array
     {
-        return $this->projects->all();
+        return $this->projects->allForUser($userId);
     }
 }

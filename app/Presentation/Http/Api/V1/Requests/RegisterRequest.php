@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Presentation\Http\Api\V1\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 final class RegisterRequest extends FormRequest
 {
@@ -21,7 +22,7 @@ final class RegisterRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => ['required', 'string', 'confirmed', Password::defaults()],
         ];
     }
 }

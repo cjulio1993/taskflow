@@ -7,9 +7,12 @@ namespace App\Presentation\Http\Api\V1\Controllers;
 use App\Models\User;
 use App\Presentation\Http\Api\V1\Requests\LoginRequest;
 use App\Presentation\Http\Api\V1\Requests\RegisterRequest;
+use App\Presentation\Http\Api\V1\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 final class AuthController
@@ -19,13 +22,13 @@ final class AuthController
         $user = User::query()->create([
             'name' => $request->string('name')->toString(),
             'email' => $request->string('email')->toString(),
-            'password' => $request->string('password')->toString(),
+            'password' => Hash::make($request->string('password')->toString()),
         ]);
 
         Auth::login($user);
         $request->session()->regenerate();
 
-        return response()->json(['user' => $user], 201);
+        return (new UserResource($user))->response()->setStatusCode(201);
     }
 
     public function login(LoginRequest $request): JsonResponse
@@ -38,20 +41,20 @@ final class AuthController
 
         $request->session()->regenerate();
 
-        return response()->json(['user' => $request->user()]);
+        return (new UserResource($request->user()))->response();
     }
 
-    public function logout(Request $request): JsonResponse
+    public function logout(Request $request): Response
     {
         Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return response()->json(['message' => 'Logged out successfully.']);
+        return response()->noContent();
     }
 
     public function me(Request $request): JsonResponse
     {
-        return response()->json(['user' => $request->user()]);
+        return (new UserResource($request->user()))->response();
     }
 }

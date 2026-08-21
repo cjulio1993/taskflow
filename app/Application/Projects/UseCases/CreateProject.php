@@ -14,7 +14,7 @@ final readonly class CreateProject
 
     public function execute(CreateProjectData $data): Project
     {
-        $project = Project::create($data->name, $data->description);
+        $project = Project::create($data->ownerId, $data->name, $data->description);
 
         return $this->projects->save($project);
     }
